@@ -78,11 +78,14 @@ export class Player {
         if (this.y < this.groundY || this.velocityY < 0) {
             this.velocityY += this.gravity;
             this.y += this.velocityY;
+        }
 
-            if (this.y > this.groundY) {
-                this.y = this.groundY;
-                this.velocityY = 0;
-                if (this.state === 'JUMPING') this.state = 'RUNNING';
+        // Robust landing detection
+        if (this.y >= this.groundY) {
+            this.y = this.groundY;
+            this.velocityY = 0;
+            if (this.state === 'JUMPING') {
+                this.state = 'RUNNING';
             }
         }
 
