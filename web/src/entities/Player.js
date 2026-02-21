@@ -1,3 +1,6 @@
+import { CONFIG } from '../Config.js';
+import { Assets } from './AssetLoader.js';
+
 export class Player {
     constructor(canvas) {
         this.canvas = canvas;
@@ -13,20 +16,65 @@ export class Player {
         this.groundY = this.canvas.height - 150;
 
         this.velocityY = 0;
-        this.gravity = 0.8;
-        this.jumpForce = -18;
+        this.gravity = CONFIG.GRAVITY;
+        this.jumpForce = CONFIG.JUMP_FORCE;
 
-        this.state = 'RUNNING'; // RUNNING, JUMPING, SLIDING, CRASHED
+        this.state = 'RUNNING';
         this.animationFrame = 0;
-
-        this.glowColor = '#00f3ff';
         this.particles = [];
+
+        this.initAssets();
+    }
+
+    initAssets() {
+        Assets.preRender('player_run', this.width, this.height, (ctx) => {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = CONFIG.COLORS.CYAN;
+            ctx.strokeStyle = CONFIG.COLORS.CYAN;
+            ctx.lineWidth = 3;
+            ctx.fillStyle = 'rgba(0, 243, 255, 0.2)';
+
+            // Body
+            ctx.beginPath();
+            ctx.moveTo(10, 0);
+            ctx.lineTo(30, 0);
+            ctx.lineTo(25, 60);
+            ctx.lineTo(5, 60);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        });
+
+        Assets.preRender('player_slide', this.width + 10, this.slideHeight, (ctx) => {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = CONFIG.COLORS.CYAN;
+            ctx.strokeStyle = CONFIG.COLORS.CYAN;
+            ctx.lineWidth = 3;
+            ctx.fillStyle = 'rgba(0, 243, 255, 0.2)';
+
+            // Rounded rect
+            const r = 5;
+            const w = this.width + 10;
+            const h = this.slideHeight;
+            ctx.beginPath();
+            ctx.moveTo(r, 0);
+            ctx.lineTo(w - r, 0);
+            ctx.quadraticCurveTo(w, 0, w, r);
+            ctx.lineTo(w, h - r);
+            ctx.quadraticCurveTo(w, h, w - r, h);
+            ctx.lineTo(r, h);
+            ctx.quadraticCurveTo(0, h, 0, h - r);
+            ctx.lineTo(0, r);
+            ctx.quadraticCurveTo(0, 0, r, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        });
     }
 
     update() {
         if (this.state === 'CRASHED') return;
 
-        // Apply gravity
         if (this.y < this.groundY || this.velocityY < 0) {
             this.velocityY += this.gravity;
             this.y += this.velocityY;
@@ -34,16 +82,13 @@ export class Player {
             if (this.y > this.groundY) {
                 this.y = this.groundY;
                 this.velocityY = 0;
-                if (this.state === 'JUMPING') {
-                    this.state = 'RUNNING';
-                }
+                if (this.state === 'JUMPING') this.state = 'RUNNING';
             }
         }
 
-        // Animation frames
         this.animationFrame += 0.15;
 
-        // Handle particles
+        // Particles
         if (this.state !== 'JUMPING' && Math.random() > 0.5) {
             this.particles.push({
                 x: this.x + 10,
@@ -68,15 +113,11 @@ export class Player {
             this.state = 'JUMPING';
             this.velocityY = this.jumpForce;
             this.height = this.baseHeight;
-            // Burst particles
             for (let i = 0; i < 10; i++) {
                 this.particles.push({
-                    x: this.x + 20,
-                    y: this.y + this.height,
-                    vx: (Math.random() - 0.5) * 5,
-                    vy: Math.random() * 2,
-                    size: Math.random() * 5,
-                    life: 1.0
+                    x: this.x + 20, y: this.y + this.height,
+                    vx: (Math.random() - 0.5) * 5, vy: Math.random() * 2,
+                    size: Math.random() * 5, life: 1.0
                 });
             }
         }
@@ -95,7 +136,6 @@ export class Player {
     draw() {
         const ctx = this.ctx;
 
-        // Draw particles
         this.particles.forEach(p => {
             ctx.fillStyle = `rgba(0, 243, 255, ${p.life})`;
             ctx.beginPath();
@@ -103,73 +143,30 @@ export class Player {
             ctx.fill();
         });
 
-        ctx.save();
-
-        // Set glow effect
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = this.glowColor;
-        ctx.strokeStyle = this.glowColor;
-        ctx.lineWidth = 3;
-        ctx.fillStyle = 'rgba(0, 243, 255, 0.2)';
-
-        // Dynamic Y adjustment for size change while sliding
         const drawY = this.state === 'SLIDING' ? this.y + (this.baseHeight - this.slideHeight) : this.y;
+        const asset = this.state === 'SLIDING' ? Assets.get('player_slide') : Assets.get('player_run');
 
-        // Draw stylized runner shape
-        ctx.beginPath();
-        if (this.state === 'SLIDING') {
-            // Rounded rectangle for sliding
-            this.roundRect(ctx, this.x, drawY, this.width + 10, this.height, 5);
-        } else {
-            // Humanoid-ish silhouette for running/jumping
-            // We'll use simple geometric parts to keep it "vector/blueprint" style
-
-            // Head
-            ctx.arc(this.x + 20, drawY - 10 + (Math.sin(this.animationFrame) * 2), 8, 0, Math.PI * 2);
-
-            // Body
-            ctx.moveTo(this.x + 10, drawY);
-            ctx.lineTo(this.x + 30, drawY);
-            ctx.lineTo(this.x + 25, drawY + this.height);
-            ctx.lineTo(this.x + 5, drawY + this.height);
-            ctx.closePath();
+        if (asset) {
+            // Asset is 40px larger than actual (for glow padding)
+            ctx.drawImage(asset, this.x - 20, drawY - 20);
         }
 
-        ctx.fill();
-        ctx.stroke();
-
-        // Accent lines for motion
-        if (this.state === 'RUNNING') {
+        // Animated head (draw in real time for float effect)
+        ctx.save();
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = CONFIG.COLORS.CYAN;
+        ctx.strokeStyle = CONFIG.COLORS.CYAN;
+        ctx.lineWidth = 2;
+        if (this.state !== 'SLIDING') {
             ctx.beginPath();
-            ctx.moveTo(this.x - 10, drawY + 20);
-            ctx.lineTo(this.x - 5, drawY + 20);
+            ctx.arc(this.x + 20, drawY - 10 + (Math.sin(this.animationFrame) * 2), 8, 0, Math.PI * 2);
             ctx.stroke();
         }
-
         ctx.restore();
-    }
-
-    roundRect(ctx, x, y, width, height, radius) {
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.lineTo(x + width - radius, y);
-        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-        ctx.lineTo(x + width, y + height - radius);
-        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-        ctx.lineTo(x + radius, y + height);
-        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-        ctx.lineTo(x, y + radius);
-        ctx.quadraticCurveTo(x, y, x + radius, y);
-        ctx.closePath();
     }
 
     getBounds() {
         const drawY = this.state === 'SLIDING' ? this.y + (this.baseHeight - this.slideHeight) : this.y;
-        return {
-            x: this.x,
-            y: drawY,
-            width: this.width,
-            height: this.height
-        };
+        return { x: this.x, y: drawY, width: this.width, height: this.height };
     }
 }

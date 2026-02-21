@@ -27,6 +27,20 @@ window.addEventListener('keydown', (e) => {
 
 window.addEventListener('keyup', (e) => engine.handleInput('keyup', e.key));
 
+// Mobile Touch Support
+window.addEventListener('touchstart', (e) => {
+  const touchY = e.touches[0].clientY;
+  if (touchY < window.innerHeight / 2) {
+    engine.handleInput('keydown', ' '); // Top half jumps
+  } else {
+    engine.handleInput('keydown', 's'); // Bottom half slides
+  }
+});
+
+window.addEventListener('touchend', () => {
+  engine.handleInput('keyup', 's');
+});
+
 // UI Buttons
 document.getElementById('start-btn').addEventListener('click', (e) => {
   e.target.blur();

@@ -1,6 +1,7 @@
 import { Player } from './entities/Player.js';
 import { Obstacle } from './entities/Obstacle.js';
 import { Background } from './entities/Background.js';
+import { CONFIG } from './Config.js';
 
 export class Engine {
     constructor(canvas) {
@@ -11,20 +12,20 @@ export class Engine {
         this.background = new Background(canvas);
         this.obstacles = [];
 
-        this.gameSpeed = 7;
+        this.gameSpeed = CONFIG.INITIAL_SPEED;
         this.score = 0;
         this.highScore = localStorage.getItem('neon-velocity-best') || 0;
-        this.gameState = 'START'; // START, RUNNING, GAME_OVER
+        this.gameState = 'START';
 
         this.lastTime = 0;
         this.obstacleTimer = 0;
-        this.obstacleInterval = 1500;
+        this.obstacleInterval = CONFIG.INITIAL_OBSTACLE_INTERVAL;
     }
 
     start() {
         this.gameState = 'RUNNING';
         this.score = 0;
-        this.gameSpeed = 7;
+        this.gameSpeed = CONFIG.INITIAL_SPEED;
         this.obstacles = [];
         this.player = new Player(this.canvas);
 
@@ -46,22 +47,25 @@ export class Engine {
     }
 
     update(timestamp) {
+        if (!this.lastTime) this.lastTime = timestamp;
         const deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
 
         if (this.gameState === 'RUNNING') {
-            this.score += deltaTime * 0.01;
-            this.gameSpeed += 0.001; // Increase difficulty
+            this.score += deltaTime * CONFIG.SCORE_MULTIPLIER;
+            this.gameSpeed = Math.min(CONFIG.MAX_SPEED, this.gameSpeed + (deltaTime * CONFIG.SPEED_ACCEL / 16));
 
             this.background.update(this.gameSpeed);
             this.player.update();
 
-            // Handle Obstacles
             this.obstacleTimer += deltaTime;
             if (this.obstacleTimer > this.obstacleInterval) {
                 this.obstacles.push(new Obstacle(this.canvas, this.gameSpeed));
                 this.obstacleTimer = 0;
-                this.obstacleInterval = Math.max(800, 1500 - (this.gameSpeed * 50));
+                this.obstacleInterval = Math.max(
+                    CONFIG.MIN_OBSTACLE_INTERVAL,
+                    CONFIG.INITIAL_OBSTACLE_INTERVAL - (this.gameSpeed * CONFIG.INTERVAL_DECAY)
+                );
             }
 
             this.obstacles.forEach(obs => {
@@ -72,17 +76,13 @@ export class Engine {
             });
 
             this.obstacles = this.obstacles.filter(obs => !obs.markedForDeletion);
-
-            // Update UI
             document.getElementById('score').innerText = Math.floor(this.score) + 'm';
         }
     }
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
         this.background.draw();
-
         if (this.gameState !== 'START') {
             this.player.draw();
             this.obstacles.forEach(obs => obs.draw());
@@ -92,9 +92,7 @@ export class Engine {
     checkCollision(player, obs) {
         const p = player.getBounds();
         const o = obs.getBounds();
-
-        // Add small margin for better feel (forgiving hitbox)
-        const margin = 10;
+        const margin = CONFIG.HITBOX_MARGIN;
 
         return (
             p.x + margin < o.x + o.width &&
