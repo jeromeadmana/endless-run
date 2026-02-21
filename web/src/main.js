@@ -12,6 +12,9 @@ function resize() {
   if (engine.background) {
     engine.background.groundY = canvas.height - 90;
   }
+  if (engine.player) {
+    engine.player.updateSize();
+  }
 }
 
 window.addEventListener('resize', resize);

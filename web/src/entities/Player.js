@@ -12,8 +12,8 @@ export class Player {
         this.slideHeight = 35;
 
         this.x = 100;
-        this.y = this.canvas.height - 150;
-        this.groundY = this.canvas.height - 150;
+        this.updateSize();
+        this.y = this.groundY;
 
         this.velocityY = 0;
         this.gravity = CONFIG.GRAVITY;
@@ -24,6 +24,13 @@ export class Player {
         this.particles = [];
 
         this.initAssets();
+    }
+
+    updateSize() {
+        this.groundY = this.canvas.height - CONFIG.GROUND_Y_OFFSET - this.baseHeight;
+        if (this.state !== 'JUMPING') {
+            this.y = this.groundY;
+        }
     }
 
     initAssets() {

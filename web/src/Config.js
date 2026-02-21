@@ -2,6 +2,7 @@ export const CONFIG = {
     // Physics
     GRAVITY: 1.0,
     JUMP_FORCE: -20,
+    GROUND_Y_OFFSET: 90,
 
     // Game Speed
     INITIAL_SPEED: 7,

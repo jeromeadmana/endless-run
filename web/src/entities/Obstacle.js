@@ -10,13 +10,13 @@ export class Obstacle {
             this.width = 30 + Math.random() * 20;
             this.height = 40 + Math.random() * 40;
             this.x = this.canvas.width;
-            this.y = this.canvas.height - 150 - this.height + 60; // Grounded
+            this.y = this.canvas.height - CONFIG.GROUND_Y_OFFSET - this.height;
             this.color = '#ff00ff';
         } else {
             this.width = 40;
             this.height = 30;
             this.x = this.canvas.width;
-            this.y = this.canvas.height - 150 - 60; // Floating
+            this.y = this.canvas.height - CONFIG.GROUND_Y_OFFSET - 80; // Floating
             this.color = '#ff9d00';
         }
 
