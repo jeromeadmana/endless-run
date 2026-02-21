@@ -31,6 +31,11 @@ export class Engine {
         this.obstacles = [];
         this.player = new Player(this.canvas);
 
+        // Reset timers to avoid delta spikes and interval carry-over
+        this.obstacleTimer = 0;
+        this.obstacleInterval = CONFIG.INITIAL_OBSTACLE_INTERVAL;
+        this.lastTime = 0;
+
         document.getElementById('start-screen').classList.remove('active');
         document.getElementById('game-over-screen').classList.remove('active');
         document.getElementById('hud').classList.add('active');
@@ -54,7 +59,7 @@ export class Engine {
         this.lastTime = timestamp;
 
         if (this.gameState === 'RUNNING') {
-            const diffConfig = CONFIG.DIFFICULTIES[this.difficulty];
+            const diffConfig = CONFIG.DIFFICULTIES[this.difficulty] || CONFIG.DIFFICULTIES.EASY;
             this.score += deltaTime * CONFIG.SCORE_MULTIPLIER;
             this.gameSpeed = Math.min(diffConfig.MAX_SPEED, this.gameSpeed + (deltaTime * diffConfig.SPEED_ACCEL / 16));
 
