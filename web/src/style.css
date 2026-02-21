@@ -98,7 +98,8 @@ body {
   opacity: 1;
 }
 
-.score-container, .high-score-container {
+.score-container,
+.high-score-container {
   display: flex;
   flex-direction: column;
 }
@@ -158,6 +159,37 @@ h1 {
   transform: translateY(-2px);
 }
 
+.difficulty-selection {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.diff-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.diff-btn.active {
+  background: rgba(0, 243, 255, 0.1);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+}
+
+.diff-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
 .main-btn.secondary {
   border-color: var(--neon-magenta);
   color: var(--neon-magenta);
@@ -207,21 +239,55 @@ h1 {
 }
 
 @keyframes glitch-anim {
-  0% { clip: rect(31px, 9999px, 94px, 0); }
-  20% { clip: rect(62px, 9999px, 42px, 0); }
-  40% { clip: rect(16px, 9999px, 78px, 0); }
-  60% { clip: rect(58px, 9999px, 53px, 0); }
-  80% { clip: rect(83px, 9999px, 83px, 0); }
-  100% { clip: rect(51px, 9999px, 48px, 0); }
+  0% {
+    clip: rect(31px, 9999px, 94px, 0);
+  }
+
+  20% {
+    clip: rect(62px, 9999px, 42px, 0);
+  }
+
+  40% {
+    clip: rect(16px, 9999px, 78px, 0);
+  }
+
+  60% {
+    clip: rect(58px, 9999px, 53px, 0);
+  }
+
+  80% {
+    clip: rect(83px, 9999px, 83px, 0);
+  }
+
+  100% {
+    clip: rect(51px, 9999px, 48px, 0);
+  }
 }
 
 @keyframes glitch-anim2 {
-  0% { clip: rect(65px, 9999px, 100px, 0); }
-  20% { clip: rect(30px, 9999px, 50px, 0); }
-  40% { clip: rect(80px, 9999px, 90px, 0); }
-  60% { clip: rect(10px, 9999px, 20px, 0); }
-  80% { clip: rect(40px, 9999px, 60px, 0); }
-  100% { clip: rect(70px, 9999px, 80px, 0); }
+  0% {
+    clip: rect(65px, 9999px, 100px, 0);
+  }
+
+  20% {
+    clip: rect(30px, 9999px, 50px, 0);
+  }
+
+  40% {
+    clip: rect(80px, 9999px, 90px, 0);
+  }
+
+  60% {
+    clip: rect(10px, 9999px, 20px, 0);
+  }
+
+  80% {
+    clip: rect(40px, 9999px, 60px, 0);
+  }
+
+  100% {
+    clip: rect(70px, 9999px, 80px, 0);
+  }
 }
 
 .terminal-text {

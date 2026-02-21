@@ -1,7 +1,7 @@
 export const CONFIG = {
     // Physics
-    GRAVITY: 0.8,
-    JUMP_FORCE: -18,
+    GRAVITY: 1.0,
+    JUMP_FORCE: -20,
 
     // Game Speed
     INITIAL_SPEED: 7,
@@ -27,5 +27,24 @@ export const CONFIG = {
     },
 
     // Collision
-    HITBOX_MARGIN: 12
+    HITBOX_MARGIN: 12,
+
+    // Difficulty Settings
+    DIFFICULTIES: {
+        EASY: {
+            MAX_SPEED: 15,
+            SPEED_ACCEL: 0.001,
+            MIN_OBSTACLE_INTERVAL: 850
+        },
+        MEDIUM: {
+            MAX_SPEED: 22,
+            SPEED_ACCEL: 0.0018,
+            MIN_OBSTACLE_INTERVAL: 700
+        },
+        HARD: {
+            MAX_SPEED: 30,
+            SPEED_ACCEL: 0.0025,
+            MIN_OBSTACLE_INTERVAL: 550
+        }
+    }
 };

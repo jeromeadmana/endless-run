@@ -42,14 +42,24 @@ window.addEventListener('touchend', () => {
 });
 
 // UI Buttons
+let selectedDifficulty = 'EASY';
+
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedDifficulty = e.target.dataset.difficulty;
+  });
+});
+
 document.getElementById('start-btn').addEventListener('click', (e) => {
   e.target.blur();
-  engine.start();
+  engine.start(selectedDifficulty);
 });
 
 document.getElementById('restart-btn').addEventListener('click', (e) => {
   e.target.blur();
-  engine.start();
+  engine.start(selectedDifficulty);
 });
 
 // Game Loop

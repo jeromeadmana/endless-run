@@ -16,14 +16,16 @@ export class Engine {
         this.score = 0;
         this.highScore = localStorage.getItem('neon-velocity-best') || 0;
         this.gameState = 'START';
+        this.difficulty = 'EASY'; // Default
 
         this.lastTime = 0;
         this.obstacleTimer = 0;
         this.obstacleInterval = CONFIG.INITIAL_OBSTACLE_INTERVAL;
     }
 
-    start() {
+    start(difficulty = 'EASY') {
         this.gameState = 'RUNNING';
+        this.difficulty = difficulty;
         this.score = 0;
         this.gameSpeed = CONFIG.INITIAL_SPEED;
         this.obstacles = [];
@@ -52,8 +54,9 @@ export class Engine {
         this.lastTime = timestamp;
 
         if (this.gameState === 'RUNNING') {
+            const diffConfig = CONFIG.DIFFICULTIES[this.difficulty];
             this.score += deltaTime * CONFIG.SCORE_MULTIPLIER;
-            this.gameSpeed = Math.min(CONFIG.MAX_SPEED, this.gameSpeed + (deltaTime * CONFIG.SPEED_ACCEL / 16));
+            this.gameSpeed = Math.min(diffConfig.MAX_SPEED, this.gameSpeed + (deltaTime * diffConfig.SPEED_ACCEL / 16));
 
             this.background.update(this.gameSpeed);
             this.player.update();
@@ -63,7 +66,7 @@ export class Engine {
                 this.obstacles.push(new Obstacle(this.canvas, this.gameSpeed));
                 this.obstacleTimer = 0;
                 this.obstacleInterval = Math.max(
-                    CONFIG.MIN_OBSTACLE_INTERVAL,
+                    diffConfig.MIN_OBSTACLE_INTERVAL,
                     CONFIG.INITIAL_OBSTACLE_INTERVAL - (this.gameSpeed * CONFIG.INTERVAL_DECAY)
                 );
             }
@@ -108,6 +111,7 @@ export class Engine {
                 if (key === ' ' || key === 'ArrowUp') this.player.jump();
                 if (key === 's' || key === 'ArrowDown') this.player.slide(true);
             } else if (type === 'keyup') {
+                if (key === ' ' || key === 'ArrowUp') this.player.cancelJump();
                 if (key === 's' || key === 'ArrowDown') this.player.slide(false);
             }
         }

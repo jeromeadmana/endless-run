@@ -123,6 +123,13 @@ export class Player {
         }
     }
 
+    cancelJump() {
+        // If we are moving up, cut the velocity to make the jump shorter
+        if (this.state === 'JUMPING' && this.velocityY < -5) {
+            this.velocityY = -5;
+        }
+    }
+
     slide(active) {
         if (active && this.state === 'RUNNING') {
             this.state = 'SLIDING';
